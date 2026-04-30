@@ -74,7 +74,9 @@ So in this JSON response, it's easy for us to group responses to the original th
 
 But this isn't going to always be the case, sometimes we'll have people who dont reply to a thread in slack, but rather directly reply in the broader chat - how can I account for this?
 
-<img src="../../assets/img/memes/darn-it-shoot.gif" alt="dang-it.png">
+<div style="text-align: center">
+  <img src="../assets/img/memes/darn-it-shoot.gif" width="30%" alt="title">
+</div>
 
 So for our original `thread` case, `replies to a thread` in slack will have a `thread_ts` that matches the parent message, easy to group
 
