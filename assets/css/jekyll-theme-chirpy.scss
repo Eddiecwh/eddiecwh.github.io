@@ -1,0 +1,147 @@
+---
+---
+
+/* prettier-ignore */
+@use 'main
+{%- if jekyll.environment == "production" -%}
+  .bundle
+{%- endif -%}
+';
+
+/* ── Terminal theme by Eddie Chan ── */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Fira+Code:wght@300;400;500&display=swap');
+
+/* ── Typography ── */
+body {
+  font-family: 'Fira Code', monospace;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+code,
+pre,
+kbd {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ── Light mode ── */
+:root:not([data-mode='dark']) {
+  --sidebar-bg: #1a1a1a;
+  --link-color: #007a3d;
+}
+
+/* ── Dark mode ── */
+[data-mode='dark'] {
+  --link-color: #00cc66;
+}
+
+/* ── Terminal prompt on post headings only ── */
+.post-content h1::before {
+  content: '> ';
+  color: #00cc66;
+  font-weight: 300;
+}
+
+.post-content h2::before {
+  content: '# ';
+  color: #00cc66;
+  opacity: 0.6;
+  font-weight: 300;
+}
+
+/* ── Sidebar terminal styling ── */
+#sidebar {
+  background-color: #0d0d0d;
+  border-right: 1px solid rgba(0, 204, 102, 0.3);
+}
+
+#sidebar .site-title a {
+  color: #00cc66;
+  letter-spacing: 0.05em;
+}
+
+#sidebar .site-subtitle {
+  color: rgba(0, 255, 136, 0.5);
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+}
+
+#sidebar nav a {
+  color: rgba(0, 204, 102, 0.7);
+}
+
+#sidebar nav a:hover,
+#sidebar nav a.active {
+  color: #00cc66;
+}
+
+/* ── Blinking cursor on site title ── */
+#sidebar .site-title a::after {
+  content: '▋';
+  animation: blink 1.2s step-end infinite;
+  margin-left: 2px;
+  color: #00cc66;
+}
+
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ── Avatar glow ── */
+.avatar img {
+  border-radius: 4px;
+  border: 1px solid #00cc66;
+  box-shadow: 0 0 12px rgba(0, 204, 102, 0.3);
+  transition: box-shadow 0.3s;
+}
+
+.avatar img:hover {
+  box-shadow: 0 0 24px rgba(0, 204, 102, 0.6);
+}
+
+/* ── Code blocks ── */
+div.highlight,
+figure.highlight {
+  border-radius: 2px;
+  border: 1px solid rgba(0, 204, 102, 0.15);
+}
+
+/* ── Tags ── */
+.post-tag,
+a.post-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  border-radius: 2px;
+}
+
+/* ── Blockquotes ── */
+blockquote {
+  border-left: 3px solid #00cc66;
+  font-style: normal;
+}
+
+/* ── Thin green scrollbar ── */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #00cc66;
+  border-radius: 2px;
+  opacity: 0.4;
+}
