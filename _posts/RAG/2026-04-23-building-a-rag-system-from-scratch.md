@@ -1,5 +1,5 @@
 ---
-title: "Building a RAG system From Scratch"
+title: "1. Building a RAG system From Scratch"
 date: 2026-04-23
 categories: [RAG]
 tags: [rag, python, llm]

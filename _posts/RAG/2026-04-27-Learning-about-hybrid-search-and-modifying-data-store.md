@@ -1,5 +1,5 @@
 ---
-title: "Learning About Hybrid Search and Modifying Data Stores"
+title: "3. Learning About Hybrid Search and Modifying Data Stores"
 date: 2026-04-27
 categories: [RAG]
 tags: [rag, python, llm]
