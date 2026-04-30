@@ -1,7 +1,7 @@
 ---
 title: "2. Building A Roadmap"
 date: 2026-04-24
-categories: [RAG]
+categories: [RAG - AI Chatbot]
 tags: [rag, python, llm]
 ---
 

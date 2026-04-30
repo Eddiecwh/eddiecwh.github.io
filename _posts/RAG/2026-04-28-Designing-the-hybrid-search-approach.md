@@ -1,7 +1,7 @@
 ---
 title: "4. Designing the Hybrid Search, and problems continued..."
 date: 2026-04-28
-categories: [RAG]
+categories: [RAG - AI Chatbot]
 tags: [rag, python, llm]
 ---
 

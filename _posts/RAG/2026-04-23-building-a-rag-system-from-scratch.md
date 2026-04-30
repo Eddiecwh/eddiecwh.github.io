@@ -1,7 +1,7 @@
 ---
 title: "1. Building a RAG system From Scratch"
 date: 2026-04-23
-categories: [RAG]
+categories: [RAG - AI Chatbot]
 tags: [rag, python, llm]
 ---
 

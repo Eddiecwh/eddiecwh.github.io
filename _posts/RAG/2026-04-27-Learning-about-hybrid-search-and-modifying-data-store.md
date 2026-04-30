@@ -1,7 +1,7 @@
 ---
 title: "3. Learning About Hybrid Search and Modifying Data Stores"
 date: 2026-04-27
-categories: [RAG]
+categories: [RAG - AI Chatbot]
 tags: [rag, python, llm]
 ---
 
