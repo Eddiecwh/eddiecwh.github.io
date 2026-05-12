@@ -26,11 +26,11 @@ This is important to consider when deciding between the two dependencies Spring 
 With Spring Web, step 1 and step 2 would happen on the same thread, so the response can't go out until the RAG query finishes.
 With Reactive WebFlux, step 1 returns immediately and step 2 runs asysncrhonously, but we can get around this with `@Async` and `thread pools`, so I'm going to go with route 1 for the learning experience
 
-<img src="../../assets/img/figures/sb-skeleton.png" alt="springboot-project-dir" style="width: 100%">
+<img src="../assets/img/figures/sb-skeleton.png" alt="springboot-project-dir" style="width: 100%">
 
 <p style="text-align: center; font-style: italic">Base SpringBoot project dir buildout</p>
 
-<img src="../../assets/img/figures/sample-api-call.png" alt="postman-api-call" style="width: 100%">
+<img src="../assets/img/figures/sample-api-call.png" alt="postman-api-call" style="width: 100%">
 
 Testing our 1 endpoint:
 
@@ -75,7 +75,7 @@ Answer: It's 15 seconds in production
 second question is stateful and passes conversation history from previous requests
 ```
 
-<img src="../../assets/img/figures/sb-flow.png" alt="sb-flow" style="width: 100%">
+<img src="../assets/img/figures/sb-flow.png" alt="sb-flow" style="width: 100%">
 
 Our Python service will continue to remain stateless. Spring Boot will manage the state, each request will just
 include the history.
@@ -122,14 +122,14 @@ Our new requestBody that is passed through each API call (via SpringBoot) should
 }
 ```
 
-<img src="../../assets/img/figures/updated-proj-structure.png" alt="sb-flow" style="width: 100%">
+<img src="../assets/img/figures/updated-proj-structure.png" alt="sb-flow" style="width: 100%">
 
 <p style="text-align: center; font-style: italic">Updated project structure</p>
 
 I am now also realizing that I did not updated the `build_prompt` method in our Python script so our context isn't actually being used...
 
 <div style="text-align: center">
-  <img src="../../assets/img/memes/facepalm.gif" alt="facepalm" style="width: 50%">
+  <img src="../assets/img/memes/facepalm.gif" alt="facepalm" style="width: 50%">
 </div>
 
 Creating and mofiying our wrapper classes and requestBodies to mimic our Java DTOs setup
@@ -148,10 +148,10 @@ class QueryRequest(BaseModel):
 
 ### Testing our Conversational RAG ChatBot
 
-<img src="../../assets/img/figures/query-1.png" alt="query-1.png" style="width: 100%">
-<img src="../../assets/img/figures/query-2.png" alt="query-1.png" style="width: 100%">
-<img src="../../assets/img/figures/query-3.png" alt="query-1.png" style="width: 100%">
+<img src="../assets/img/figures/query-1.png" alt="query-1.png" style="width: 100%">
+<img src="../assets/img/figures/query-2.png" alt="query-1.png" style="width: 100%">
+<img src="../assets/img/figures/query-3.png" alt="query-1.png" style="width: 100%">
 
 Looks good, we're able to have more than a one question conversation! Although, I'll have to make some changes to the domain field as it requires a domain to be given (confluence, slack, etc..) or it will fail, and it is currently setup as a string so if it is not a direct match with what's in the database it will fail.
 
-<img src="../../assets/img/figures/db-message-storage.png" alt="query-1.png" style="width: 100%">
+<img src="../assets/img/figures/db-message-storage.png" alt="query-1.png" style="width: 100%">
