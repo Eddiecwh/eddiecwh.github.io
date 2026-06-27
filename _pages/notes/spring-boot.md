@@ -77,3 +77,4 @@ For more complex queries we just use `@Query`
 @Query("SELECT c FROM ConversationHistory c WHERE c.sessionId = :sessionId AND c.createdAt > :since")
 List<ConversationHistory> findRecentBySession(String sessionId, LocalDateTime since);
 ```
+
