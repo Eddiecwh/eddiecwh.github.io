@@ -65,7 +65,7 @@ I think this is where oberservability and resilience are going to be very import
 - Is it our fault? some part of our pipleline down?
 - Is it a service provider fault? If twillio is down, we can implement a strategy like exponential retry, but if their service is down for an hour maybe, exponential retry's window is way below that, so we need to be able to log the reason for the error - perhaps like in the case of a 500 error, twillio is down -> let's mark the request as pending for retry or something and revisit this later
 
-<img src="../../../assets/img/figures/system-design/notification-system/notification-lifecycle.png" alt="query-1.png" style="width: 100%">
+<img src="../assets/img/figures/system-design/notification-system/notification-lifecycle.png" alt="query-1.png" style="width: 100%">
 
 <h4>Service Implementation Details Planning</h4>
 
@@ -79,7 +79,7 @@ Going down the rabbit hole cause I mentioned it... I'll have to think about impl
 
 Regarding push notifications, in the initial buildout, we have no client app to send notifications to, so it's out of scope for now.
 
-<img src="../../../assets/img/figures/system-design/notification-system/design-plan.png" alt="query-1.png" style="width: 100%">
+<img src="../assets/img/figures/system-design/notification-system/design-plan.png" alt="query-1.png" style="width: 100%">
 
 <h4>Designing our database</h4>
 
