@@ -5,6 +5,14 @@ categories: [Backend System Design, Notification System]
 tags: [System Design, Backend, Into]
 ---
 
+***Part 1 of my Backend System Design Learning Series***
+<hr>
+***Developing a Notification Service to learn how backend systems are built***
+
+[Click here to see the GitHub Repo](https://github.com/Eddiecwh/NotifyFlow)
+<hr>
+
+
 Im starting each problem with defining the problem statement and writing down my thoughts before writing any code
 
 What should a notification system do?
