@@ -1,6 +1,6 @@
 ---
 title: "File Processor - Design and Planning"
-date: 2026-08-18
+date: 2026-08-19
 categories: [Backend System Design, File Processor]
 tags: [System Design, Backend]
 ---
@@ -171,11 +171,12 @@ files/{fileId}/variants/480p.mp4
 |id (PK)| int |
 |user_id (FK) | int |
 |filename| varchar |
-|filesize| long |
+|filesize| bigint |
 |filetype| varchar |
 |s3_file_path| varchar |
 |create_dt|datetime|
 |update_dt|datetime|
+|deleted_at|datetime|
 
 |jobs|
 |---|
@@ -193,6 +194,72 @@ files/{fileId}/variants/480p.mp4
 | password_hash | varchar |
 | create_dt | datetime |
 | update_dt | datetime |
+
+### API Endpoints
+```
+POST   /files/                      — initiate upload
+PUT    /files/{fileId}              — update file (complete upload)
+GET    /files/{fileId}              — download a file
+GET    /files/                      — list user's files
+DELETE /files/{fileId}              — delete a file (soft delete)
+GET    /files/{fileId}/jobs         — get all job statuses
+GET    /files/{fileId}/jobs?type=   — get specific job status
+```
+### POST /files Request Body and Response
+```
+{
+  "filename": "video.mp4",
+  "filetype": "video/mp4",
+  "size" : 29884416
+}
+```
+
+If not succesfully initiated:
+```
+Error 401 (Unauthorized)
+Error 400 (For bad request Body)
+```
+
+If succesfully initiated:
+```
+Array of presigned URLs
+- Only 1 if simple upload < 100 MB
+- 1 presigned URL per 100 MB
+- Upload ID
+- No. of parts
+- Part size
+- FileId
+```
+
+### GET /files/{fileId} Parameter Specification and Response
+
+```
+GET /files/{fileId}?type=thumbnail
+GET /files/{fileId}?type=original
+GET /files/{fileId}?type=transcoded&size=720p
+GET /files/{fileId}?type=transcoded&size=480p
+GET /files/{fileId}?type=transcoded&size=360p
+
+```
+If not succesfully initiated:
+```
+Error 401 (Unauthorized)
+Error 400 (For bad request Body)
+```
+
+If succesfully initiated:
+```
+{
+  "fileId": "abc123",
+  "variant": "720p",
+  "downloadUrl": "https://s3.amazonaws.com/...",
+  "expiresIn": 3600
+}
+```
+
+
+
+
 
 
 
