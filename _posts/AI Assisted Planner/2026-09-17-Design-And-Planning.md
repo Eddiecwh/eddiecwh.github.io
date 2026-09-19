@@ -155,7 +155,33 @@ Another modification, I might want to support a seperate Task view later on - so
 
 <img src="../assets/img/figures/projects/ai-assistant-scheduler/entity2.png" alt="query-1.png" style="width: 100%; margin: 0 auto">
 
+<hr>
 
+### API Design ###
+
+For my CRUD operations with fetching UI details and interacting with the Google calendar API I'm going to be using REST APIs, here are a few reasons why:
+
+- We are using a standard CRUD interface with well defined resource. Users, Calendars, CalendarItems which map very well with our UI
+    - We don't have issues with under/over fetching data since our data requirements are clearly defined
+- The Google Calendar API which we have a depdendency on is also REST, so making it consistent is a bonus
+
+For the AI agent I'm thinking we might have to take a different approach. With my previous [RAG project](https://eddiecwh.github.io/categories/rag-ai-chatbot/) I was looking for a simple chat-based request response interaction with a local LLM that utilized a sample set of confluence documentation and JSON formatted slack styled messages as context. A REST API was the right approach there, because it followed a basic flow
+
+```
+user sends question → retrieve context → LLM responds → done
+```
+
+With an agentic loop it would be multi-step
+
+```
+User sends message 
+-> Agent reasons 
+-> Picks a tool 
+-> Calls Google API 
+-> Reasons again 
+-> Picks another tool 
+-> Formulates Response
+```
 
 
 
