@@ -1,5 +1,5 @@
 ---
-title: "AI Assisted Scheduler - Project Discussion and Pseudo Planning"
+title: "AI Assisted Scheduler - Project Discussion and Planning"
 date: 2026-09-17
 categories: [Projects, AI Assisted Scheduler]
 tags: [Projects, AI, Backend]
@@ -95,6 +95,10 @@ Given that the thing you're protecting is a refresh token that grants access to 
 
 ### Core Entities ###
 
+[Click here to skip the discussion and view the Core Entities Design](#my-designed-entities)
+
+#### Core Entities Discussion and Planning
+
 So our system works around users (`User`) who connect to the system via Google OAuth. Google offers more than just one calendar: There's family calendars, shared calendars, personal calendars etc... For my preliminary functional requirements I'm only going to be using personal calendars, but I want to design my entities with that forward compatability in mind. So I want to add a intemediary entity `Calendar`, so we can add multiple calendars to one user if we need to. Lastly, a Calendar can have numerous `Events`
 
 <img src="../assets/img/figures/projects/ai-assistant-scheduler/entity1.png" alt="query-1.png" style="width: 75%; margin: 0 auto">
@@ -153,11 +157,45 @@ In that case, I think it would make sense to do 2 things
 
 Another modification, I might want to support a seperate Task view later on - so I'm going to add a `event_type` row on the `CalendarItem` entity so we can have a clear distinction defined in the parent table
 
+#### Big Pivot, Abandoning the Calendar Entity ####
+
+Okay huge modification here to my Core entities. After doing some reflection of my thoughts I'm realizing that my `Calendar` entity doesn't serve a real purpose. Google Calendar is the source of truth for our system, so having our own local Calendar entity would be misleading because we'd have two seperate sources, and our local Calendar entity would only really be syncing data from Google Calendar's API.
+
+In the case that Google Calendar API is down, our system reflects an inaccurate state of Google Calendar displays which is not what we want. We discussed `Consistency` over `Availabilty` and keeping them synced as closely as possible would require asynchronous sync jobs to pull Google Calendar data to ensure our Calendar entity maintains the correct state. 
+In my opinion, that's not worth the overhead.
+
+On the other hand though, the Google Calendar `Task` event differs slightly from what I was expecting it to do. I envision the tasks being able to support status' like:
+
+- Created
+- In Progress
+- Completed
+
+It supports other fields like deadlines and descriptions, but I think there's a lot more that we could add to this to make it a full fletched feature. Like say for example having the ability to add sub-tasks
+
+I'm not removing my earlier thought process and entity breakdown for the old calendar entity design because I think it's a good example of showcasing how designs can change and scopes can evolve as I go deeper into the implementation details and planning phase. 
+
+Enjoy the read! (or not)
+
+#### My Designed Entities
+
+**Core Entities v1**
+
 <img src="../assets/img/figures/projects/ai-assistant-scheduler/entity2.png" alt="query-1.png" style="width: 100%; margin: 0 auto">
+
+**Core Entities v2**
+[My reasoning](#big-pivot-abandoning-the-calendar-entity) for changing up the entity design (if you missed it)
+
+<img src="../assets/img/figures/projects/ai-assistant-scheduler/entity3.png" alt="query-1.png" style="width: 100%; margin: 0 auto">
 
 <hr>
 
+
+
 ### API Design ###
+
+[Click here to skip the discussion and view the API Design](#my-designed-endpoints)
+
+#### API Design Discussion and Planning ####
 
 For my CRUD operations with fetching UI details and interacting with the Google calendar API I'm going to be using REST APIs, here are a few reasons why:
 
@@ -182,6 +220,118 @@ User sends message
 -> Picks another tool 
 -> Formulates Response
 ```
+
+So with a REST request/response cycle, we would lose the ability to push intermediate updates to the user as they happen. We'd essentially just have the user wait for `x` amount of time as the LLM figures out next steps and what tools to solve the problem
+
+So since we are looking for `realtime updates` two twings we could look into are `SSEs` (Server Sent Events) or `WebSockets`
+
+So based on what I understand from `Websockets`, they are built on the `HTTP` protocol on top of TCP.
+- Instead of opening a new connection for every read/request response cycle, the connection stays alive until a certain idle time haas passed or the client closes the connection.
+
+The main difference between `WebSockets` & `SSE` is that
+- Websockets are `bidrectional`
+    - Both sides can send messages over the same connection
+- Server Sent Events are `unidirectional`
+    - Only the server pushes to the client, but the client can't send back over the same connection (makes sense it's called `Server Sent` events, and not `_Server AND Client_` sent events lol)
+
+So given that, for the AI agent interaction; there's going to be a constant back and forth between client and agent I initially considered WebSockets, but I got some push back from Claude to challenge my thinking
+
+> _Good reasoning, and the logic tracks. But let me push on one thing before you commit to WebSockets._
+> 
+> _Think about the actual interaction pattern:_
+>
+> - _User speaks → single message sent to server_
+> - _Server processes → pushes intermediate updates to client_
+> - _Server responds → pushes final response to client_
+> - _User speaks again → repeat_
+
+The pattern is defintely bidrectional, but not necessarily simultaneous. It's more like alternating turns, where the client sends once and the server streams back
+
+So althought SSE is unidrectional, we could pair it with regular `HTTP Post` requests
+
+```
+User speaks → HTTP POST to agent endpoint
+Server processes → SSE stream pushes intermediate updates back
+Server done → SSE stream closes
+User speaks again → new HTTP POST, new SSE stream
+```
+
+Very interesting discussion with Claude over why althought websockets sounds like the answer initially, SSE might make more sense for my use case. Here are a few reasons we discusused:
+
+- **Complexity**
+    - Websockets require managing a `persistent connection`, `handling reconnects` and there is `more state` on the server side.
+        - SSE is easier to implement, and my backend will be built with Spring Boot which has `native SSE` support
+- **Use Case**
+    - Websockets are useful when we really need `simultaneous bidrectional communication`, like in a multiplayer game where players perform actions in random orders. Since our Agentic Loop is more `turn-based`, Web Sockets wouldn't be bad per say, just more of a headache to implement for something that doesn't require that kind of utility
+- **HTTP Infrastructure**
+    - `SSE works over standard HTTP`, so if we were to implement things like load balancers, proxies, security configs, etc.. These would play together naturally. WebSockets would require additional support
+
+A small pivot to handling audio input to the AI agent - I'm reasoning w/ Claude to understand my options for handling audio messages and processing it as input for our agent
+
+> *1. Client-side transcription — the browser converts speech to text before sending, and your endpoint just receives text as planned*
+> 
+> *2. Server-side transcription — the client sends raw audio to your backend, your backend transcribes it, then passes the text to the agent*
+
+**Client-side transcription thoughts and PROs/Cons**
+
+My initial thoughts are that Client-side transcription makes more sense, so we keep can the logic specific to sending/and recieving agent requests isolated to the service layer. I'm not a frontend guy, but apparently browsers haave native Web Speech API that handles transcription without any third party service. So our React frontend would be able to convert speech to text, w/o the need of any backend logic. Cool!
+
+But what would we be giving up by not handling that on the server-side?
+Here are some of the tradeoffs that I discussed w/ Claude
+
+- **More accurate transcription**
+    - Web Speech API is good, but services like Google Cloud Speech-to-Text/OpenAI Whisper are a lot more accurate
+- **Browser Support**
+    - Chrome has great support, but firefox has had inconsistent support
+- **Language Support**
+    - 3rd party services handle more languages (not so relevant for this project), but also handles accents better (hmm...)
+- **Control**
+    - If we deem the service provider to be lacking, we could just swap services without touching the frontend
+
+And for a personal project: There might be costs that are induced with using third party applications. 
+
+I think my decision for now is to keep text-transcription on the client side. The factors that matter the most to be currently are: `convinience`, `ease of setup` and `cost`
+
+If it's something that just isn't working out the way I want it to, I'll make a decision to change it later on.
+
+#### My Designed Endpoints
+
+Since the authenticated user is implicit from the OAuth token, I'm not going to have to expose userId in the path at all
+
+**CRUD Operations for Calendar Event view/modification**
+
+```
+# fetch all events
+GET /Calendars/{calendarId}/calendar_item/
+
+# fetch event by Id
+GET /Calendars/{calendarId}/calendar_item/{itemId}
+
+# Create an event
+POST /Calendars/{calendarId}/calendar_item/
+
+# Update an event
+PUT /Calendars/{calendarId}/calendar_item/{itemId}
+
+# Delete an event
+DELETE /Calendars/{calendarId}/calendar_item/{itemId}
+```
+
+**Agent Operations**
+
+```
+POST /agent/message
+Body: { 
+    "message" : "Schedule a coffee chat with John at 2:30 PM on Thursday"
+}
+
+Response: stream of SSE events
+data: {"type": "thinking", "message": "Checking your calendar..."}
+data: {"type": "thinking", "message": "Found a conflict at 2:30 PM..."}
+data: {"type": "thinking", "message": "You have a conflict, want me to suggest alternatives?"}
+data: {"type": "done"}
+```
+
 
 
 
