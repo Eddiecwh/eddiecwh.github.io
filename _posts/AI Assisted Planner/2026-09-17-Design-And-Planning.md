@@ -159,7 +159,7 @@ Another modification, I might want to support a seperate Task view later on - so
 
 #### Big Pivot, Abandoning the Calendar Entity ####
 
-Okay huge modification here to my Core entities. After doing some reflection of my thoughts I'm realizing that my `Calendar` entity doesn't serve a real purpose. Google Calendar is the source of truth for our system, so having our own local Calendar entity would be misleading because we'd have two seperate sources, and our local Calendar entity would only really be syncing data from Google Calendar's API.
+Okay huge modification here to my Core entities. After doing some reflection, I'm realizing that my `Calendar` entity doesn't serve a real purpose. Google Calendar is the source of truth for our system, so having our own local Calendar entity would be misleading because we'd have two seperate sources, and our local Calendar entity would only really be syncing data from Google Calendar's API.
 
 In the case that Google Calendar API is down, our system reflects an inaccurate state of Google Calendar displays which is not what we want. We discussed `Consistency` over `Availabilty` and keeping them synced as closely as possible would require asynchronous sync jobs to pull Google Calendar data to ensure our Calendar entity maintains the correct state. 
 In my opinion, that's not worth the overhead.
@@ -173,6 +173,8 @@ On the other hand though, the Google Calendar `Task` event differs slightly from
 It supports other fields like deadlines and descriptions, but I think there's a lot more that we could add to this to make it a full fletched feature. Like say for example having the ability to add sub-tasks
 
 I'm not removing my earlier thought process and entity breakdown for the old calendar entity design because I think it's a good example of showcasing how designs can change and scopes can evolve as I go deeper into the implementation details and planning phase. 
+
+I want to give the user the option to block off calendar time with the task, so while it's not directly related to Google Calendar's tasks, it'll be it's own entity that we can populate on Google Calendar (if the user chooses to) that might say store category, description, status, deadline just as an event body.
 
 Enjoy the read! (or not)
 
@@ -189,19 +191,19 @@ Enjoy the read! (or not)
 
 <hr>
 
-
-
 ### API Design ###
 
 [Click here to skip the discussion and view the API Design](#my-designed-endpoints)
 
 #### API Design Discussion and Planning ####
 
-For my CRUD operations with fetching UI details and interacting with the Google calendar API I'm going to be using REST APIs, here are a few reasons why:
+For my CRUD operations with fetching UI details/task creation/ and interacting with the Google calendar API I'm going to be using REST APIs, here are a few reasons why:
 
-- We are using a standard CRUD interface with well defined resource. Users, Calendars, CalendarItems which map very well with our UI
-    - We don't have issues with under/over fetching data since our data requirements are clearly defined
-- The Google Calendar API which we have a depdendency on is also REST, so making it consistent is a bonus
+- We are using a standard CRUD interface with well defined resource. 
+- We don't have issues with under/over fetching data since our data requirements are clearly defined
+- The Google Calendar API, which we have a depdendency on, is also REST so making it consistent is a bonus
+
+Our Calendar endpoints will really just be a proxy for calling Google Calendar's APIs, since Google we adjusted to Google Calendar being the source of truth. But having our Controller and our own Service layer makes sense because we might have certain business logic in place. Especially since we will want to have custom specifications on how to create tasks as events.
 
 For the AI agent I'm thinking we might have to take a different approach. With my previous [RAG project](https://eddiecwh.github.io/categories/rag-ai-chatbot/) I was looking for a simple chat-based request response interaction with a local LLM that utilized a sample set of confluence documentation and JSON formatted slack styled messages as context. A REST API was the right approach there, because it followed a basic flow
 
@@ -290,7 +292,7 @@ Here are some of the tradeoffs that I discussed w/ Claude
 
 And for a personal project: There might be costs that are induced with using third party applications. 
 
-I think my decision for now is to keep text-transcription on the client side. The factors that matter the most to be currently are: `convinience`, `ease of setup` and `cost`
+I think my decision for now is to keep text-transcription on the client side. The factors that matter the most to be currently are: `convenience`, `ease of setup` and `cost`
 
 If it's something that just isn't working out the way I want it to, I'll make a decision to change it later on.
 
@@ -301,20 +303,61 @@ Since the authenticated user is implicit from the OAuth token, I'm not going to 
 **CRUD Operations for Calendar Event view/modification**
 
 ```
-# fetch all events
-GET /Calendars/{calendarId}/calendar_item/
+# fetch all events (leaving multiple google calendar types out of scope for now)
+GET /Calendars/Events
 
 # fetch event by Id
-GET /Calendars/{calendarId}/calendar_item/{itemId}
+GET /Calendars/Events/{eventId}
 
 # Create an event
-POST /Calendars/{calendarId}/calendar_item/
+POST /Calendars/Events
 
 # Update an event
-PUT /Calendars/{calendarId}/calendar_item/{itemId}
+PUT /Calendars/Events/{eventId}
 
 # Delete an event
-DELETE /Calendars/{calendarId}/calendar_item/{itemId}
+DELETE /Calendars/Events/{eventId}
+```
+
+**Task events**
+
+```
+# fetch all tasks
+GET /Tasks/
+
+# fetch task by Id
+GET /Tasks/{taskId}
+
+# Create an event
+POST /Tasks
+
+requestBody {
+    "title" : "Get ingredients from the store",
+    "description" : "tomatoes, strawberries, ham",
+    "category" : "Shopping",
+    "status" : "NOT_STARTED",
+    "deadline" : "2026-09-23 13:00",
+    "priority" : "HIGH",
+}
+
+# Update a task
+PUT /Tasks/{taskId}
+
+requestBody {
+    "title" : "Get ingredients from the store",
+    "description" : "pineapple, ham",
+}
+
+# Delete a task
+DELETE /Tasks/{taskId}
+
+# Block Calendar Time for Task
+POST /Tasks/{taskId}/block-time
+
+requestBody: { 
+    "start_dt": "...", 
+    "end_dt": "..." 
+}
 ```
 
 **Agent Operations**
@@ -332,11 +375,59 @@ data: {"type": "thinking", "message": "You have a conflict, want me to suggest a
 data: {"type": "done"}
 ```
 
+<hr>
+
+### High Level Design ###
+
+<img src="../assets/img/figures/projects/ai-assistant-scheduler/hld1.png" alt="query-1.png" style="width: 100%; margin: 0 auto">
+
+Just to clarify, the diagram consists of two CalendarService but they are the same class. Just pointing out the flow where we call the GoogleCalendar config from that service, and then later parse the response
+
+<img src="../assets/img/figures/projects/ai-assistant-scheduler/hld2.png" alt="query-1.png" style="width: 100%; margin: 0 auto">
+
+<img src="../assets/img/figures/projects/ai-assistant-scheduler/hld3.png" alt="query-1.png" style="width: 100%; margin: 0 auto">
+
+The agentic HLD is actually going to be interesting. I've created a small agent before with Spring AI, but it was pretty basic. Let's see how I map out this workflow design
+
+When the user sends a message after it hits the `POST /agent/message` endpoint, the first thing is that the agent needs to decide what tools it has to use to solve the problem
+
+Based on our functional requirements our agent should be able to do things like seeing/editing what's on the calendar and task list. These tools map directly to the services that we already designed
+
+- Check calendar → `CalendarService`
+- Edit calendar → `CalendarService`
+- Check tasks → `TaskService`
+- Edit tasks → `TaskService`
+
+So our agent is kinda like a loadbalancer (lol idk how I got that analogy), that decides which of our existing services to call based on the user's request
+
+Thinking about our SSE component for sending intermediary updates, our `AgentService` should be pushing real-time updates back to the client. With SpringAI, we have access to `ChatClient` which handles the communication with the `LLM Provider`. 
+
+For understanding's sake, it's like the equivalent of our `GoogleCalendarClient` which abstracts the HTTP communication with the external service. But in this case it would be the LLM API. We'd also have to define `tools` that in SpringAI which route to our `Task/Calendar` services that `ChatClient` passes to the model so our agent knows what actions it can take.
+
+So our flow starts to look like this:
+
+<img src="../assets/img/figures/projects/ai-assistant-scheduler/hld4.png" alt="query-1.png" style="width: 100%; margin: 0 auto">
 
 
+To word together what's happenning here:
 
+1. a request is made to the `/agent/message` endpoint
+2. AgentService injects `ChatClient` which makes a call to LLM
+3. LLM reasons what tools it needs for the request (based on tools that we provided the LLM via CalendarService and TaskService explicity defined as tools)
+4. As this is happenning, intermediate updates are pushed to the client via SSE
+5. The LLM determines whether or not it needs further tools calls to fufill the request
+5a. If no, pass completion information to the client
+5.b If yes, pass result back to the LLM (repeat step 3)
 
+I hope I was able to illustrate this clearly in the diagram, still getting the hang of clearly illustrating my workflows on paper
 
+<hr>
 
+### Deep-dives ###
 
+```
+The AI Agent implementation — specifically how you define tools in Spring AI, how the agentic loop actually works in code, and how you wire SSE streaming to it
+
+Google OAuth flow — the actual token exchange, how you store and decrypt the refresh token, and how you attach the access token to outbound Google API calls
+```
 
