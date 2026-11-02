@@ -1,0 +1,17 @@
+{% assign groups = 'Apps|Backend Systems|Open Source' | split: '|' %}
+
+<div class="project-groups">
+  {% for group in groups %}
+    {% assign items = site.data.projects | where: 'group', group %}
+    {% if items.size > 0 %}
+      <section class="project-group">
+        <h2 class="project-group-title">{{ group }}</h2>
+        <div class="project-grid">
+          {% for project in items %}
+            {% include project-card.html project=project %}
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  {% endfor %}
+</div>

@@ -1,0 +1,186 @@
+---
+layout: compress
+---
+
+<!doctype html>
+
+{% include origin-type.html %}
+
+{% include lang.html %}
+
+{% assign hero = site.data.projects | where: 'hero', true | first %}
+{% assign more = site.data.projects | where: 'featured', true | where_exp: 'p', 'p.hero != true' %}
+
+<html lang="{{ page.lang | default: site.alt_lang | default: site.lang }}" data-mode="dark">
+  <!-- landing styles are added through _includes/metadata-hook.html -->
+  {% include head.html lang=lang %}
+
+  <body class="lp">
+    <!-- Top nav -->
+    <header class="lp-nav">
+      <a class="lp-nav-name" href="{{ '/' | relative_url }}">{{ site.title }}</a>
+      <nav aria-label="Primary">
+        <a href="{{ '/projects/' | relative_url }}">Projects</a>
+        <a href="{{ '/blog/' | relative_url }}">Blog</a>
+        <a href="{{ '/about/' | relative_url }}">About</a>
+      </nav>
+    </header>
+
+    <main>
+      <!-- Scene 1: intro -->
+      <section class="lp-intro" aria-labelledby="lp-intro-title">
+        <div class="lp-intro-inner">
+          <p class="lp-eyebrow">software Engineer · dallas, tx</p>
+          <h1 class="lp-intro-title" id="lp-intro-title">Eddie Chan.</h1>
+          <p class="lp-intro-sub">
+            Scroll down to learn more!
+          </p>
+        </div>
+        <div class="lp-scroll-cue" aria-hidden="true">scroll <span>↓</span></div>
+      </section>
+
+      <!-- Scene 2: HF Scoring -->
+      {% if hero %}
+        <section class="lp-hf" aria-labelledby="lp-hf-title">
+          <div class="lp-hf-stage">
+            <div class="lp-phone-wrap">
+              <div class="lp-phone">
+                <div class="lp-phone-screen">
+                  {% for shot in hero.screens %}
+                    <img
+                      class="lp-shot{% if forloop.first %} is-first{% endif %}"
+                      src="{{ shot.src | relative_url }}"
+                      alt="{{ shot.alt }}"
+                      width="390"
+                      height="844"
+                      {% unless forloop.first %}loading="lazy"{% endunless %}
+                    >
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="lp-hf-number" aria-hidden="true">
+                <span class="lp-hf-number-value">3.4200</span>
+                <span class="lp-hf-number-label">hit factor</span>
+              </div>
+            </div>
+
+            <div class="lp-hf-steps">
+              <div class="lp-step">
+                <p class="lp-eyebrow lp-eyebrow--hf">{{ hero.name }}</p>
+                <h2 class="lp-step-title" id="lp-hf-title">Scoring a USPSA stage, on the phone already in your pocket.</h2>
+                <p class="lp-step-text">
+                  Score your HF style scores on a range day with friends!
+                </p>
+              </div>
+              <div class="lp-step">
+                <h3 class="lp-step-title">Tap in the hits.</h3>
+                <p class="lp-step-text">
+                  Alphas, charlies, deltas, mikes, no-shoots, and steel. One tap each, per target.
+                </p>
+              </div>
+              <div class="lp-step">
+                <h3 class="lp-step-title">Hit factor, instantly.</h3>
+                <p class="lp-step-text">
+                  Points over time, worked out as you score. Close your calculator app, you don't need that anymore
+                </p>
+              </div>
+              <div class="lp-step">
+                <h3 class="lp-step-title">Review, save, export.</h3>
+                <p class="lp-step-text">
+                  A stage library, a results dashboard, and CSV export. Everything stays on the
+                  device. No account needed.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="lp-hf-cta lp-reveal" aria-label="{{ hero.name }} links">
+          <p class="lp-hf-cta-line">Built for the shooting community.</p>
+          <div class="lp-buttons">
+            <a class="lp-btn lp-btn--hf" href="{{ hero.demo }}" target="_blank" rel="noopener">Try it live</a>
+            <a class="lp-btn lp-btn--ghost" href="{{ hero.repo }}" target="_blank" rel="noopener">View the code</a>
+          </div>
+        </section>
+      {% endif %}
+
+      <!-- Scene 3: day job + other work -->
+      <section class="lp-work" aria-labelledby="lp-work-title">
+        <div class="lp-work-head lp-reveal">
+          <p class="lp-eyebrow">by day</p>
+          <h2 class="lp-section-title" id="lp-work-title">Backend systems, mostly in Java.</h2>
+          <p class="lp-section-text">
+            Currently working in healthcare tech: Spring services, EHR integrations, and the quiet systems
+            that keep things running. On the side, I'm building smaller versions of the systems I want
+            to understand and jotting down my thoughts as I learn. Enjoy the memes!
+          </p>
+        </div>
+
+        <div class="lp-work-grid">
+          {% for p in more %}
+            <article class="lp-work-card lp-reveal">
+              <div class="lp-work-card-top">
+                <h3>{{ p.name }}</h3>
+                <span class="lp-status">{{ p.status }}</span>
+              </div>
+              <p class="lp-work-tagline">{{ p.tagline }}</p>
+              <ul class="lp-stack" aria-label="Tech stack">
+                {% for item in p.stack limit: 4 %}
+                  <li>{{ item }}</li>
+                {% endfor %}
+              </ul>
+              {% assign link = p.posts | first %}
+              <div class="lp-work-links">
+                {% if link %}
+                  <a href="{{ link.url | relative_url }}">Read the write-up</a>
+                {% elsif p.pr %}
+                  <a href="{{ p.pr }}" target="_blank" rel="noopener">See the PR</a>
+                {% endif %}
+                {% if p.repo %}
+                  <a href="{{ p.repo }}" target="_blank" rel="noopener">Code</a>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+
+        <a class="lp-more lp-reveal" href="{{ '/projects/' | relative_url }}">All projects <span aria-hidden="true">→</span></a>
+      </section>
+
+      <!-- Now -->
+      {% if site.data.now.cards %}
+        <section class="lp-now" aria-labelledby="lp-now-title">
+          <h2 class="lp-section-title lp-reveal" id="lp-now-title">Right now.</h2>
+          <div class="lp-now-grid">
+            {% for card in site.data.now.cards %}
+              <div class="lp-now-card lp-reveal">
+                <span class="lp-eyebrow">{{ card.label }}</span>
+                <h3>{{ card.title }}</h3>
+                <p>{{ card.text | markdownify | remove: '<p>' | remove: '</p>' | strip }}</p>
+              </div>
+            {% endfor %}
+          </div>
+        </section>
+      {% endif %}
+
+      <!-- Contact -->
+      <section class="lp-contact lp-reveal" aria-labelledby="lp-contact-title">
+        <h2 class="lp-contact-title" id="lp-contact-title">See something interesting?<br>Say <span style="font-style: italic; color: #00cc66">Hello!</span></h2>
+        <div class="lp-buttons">
+          <a class="lp-btn" href="mailto:{{ site.social.email }}">Email me</a>
+          <a class="lp-btn lp-btn--ghost" href="https://github.com/{{ site.github.username }}" target="_blank" rel="noopener">GitHub</a>
+          <a class="lp-btn lp-btn--ghost" href="https://www.linkedin.com/in/eddiecwh/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="lp-footer">
+      <span>© {{ 'now' | date: '%Y' }} {{ site.social.name }}</span>
+      <a href="{{ '/feed.xml' | relative_url }}">RSS</a>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <script src="{{ '/assets/js/landing.js' | relative_url }}" defer></script>
+  </body>
+</html>

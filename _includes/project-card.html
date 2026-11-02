@@ -1,0 +1,43 @@
+{% assign p = include.project %}
+<article class="project-card">
+  <div class="project-card-top">
+    <h3 class="project-name">{{ p.name }}</h3>
+    <span class="project-status is-{{ p.status | slugify }}">{{ p.status }}</span>
+  </div>
+
+  <p class="project-tagline">{{ p.tagline }}</p>
+  <p class="project-summary">{{ p.summary }}</p>
+
+  {% if p.stat %}
+    <p class="project-stat"><i class="fas fa-download fa-fw"></i> {{ p.stat }}</p>
+  {% endif %}
+
+  {% if p.stack %}
+    <ul class="project-stack" aria-label="Tech stack">
+      {% for item in p.stack %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+
+  <div class="project-links">
+    {% if p.demo %}
+      <a href="{{ p.demo }}" target="_blank" rel="noopener"><i class="fas fa-globe fa-fw"></i> Live</a>
+    {% endif %}
+    {% if p.pr %}
+      <a href="{{ p.pr }}" target="_blank" rel="noopener"><i class="fas fa-code-branch fa-fw"></i> PR</a>
+    {% endif %}
+    {% if p.repo %}
+      <a href="{{ p.repo }}" target="_blank" rel="noopener"><i class="fab fa-github fa-fw"></i> Code</a>
+    {% endif %}
+  </div>
+
+  {% if p.posts %}
+    <div class="project-posts">
+      <span class="project-posts-label">write-ups</span>
+      {% for post in p.posts %}
+        <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</article>

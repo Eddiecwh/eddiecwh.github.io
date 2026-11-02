@@ -1,0 +1,18 @@
+# The "Currently" block on the home page. Update this when things change.
+
+cards:
+  - label: building
+    title: AI-assisted scheduler
+    text: >-
+      An agent that reads my calendar, spots conflicts, and books things. Mapping the
+      data model before writing the fun part.
+
+  - label: learning
+    title: PHP and Laravel
+    text: >-
+      Trying to make a transition from backend to fullstack development!
+
+  - label: off the clock
+    title: USPSA and a lot of pasta
+    text: >-
+      Chasing Master Class in USPSA! My love for noodles runs deep, if you can geek out about [Ban Mian](https://en.wikipedia.org/wiki/Banmian), we're gonna get along just fine!

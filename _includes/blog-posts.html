@@ -1,0 +1,13 @@
+{% assign posts = site.posts | where_exp: 'p', 'p.hidden != true' | slice: 0, 5 %}
+
+<ul class="recent-list blog-latest">
+  {% for post in posts %}
+    <li>
+      <a href="{{ post.url | relative_url }}">{{ post.title }}</a>
+      <span class="recent-meta">
+        {{ post.date | date: '%b %d, %Y' }}
+        {%- if post.categories.size > 0 %} · {{ post.categories | last }}{% endif -%}
+      </span>
+    </li>
+  {% endfor %}
+</ul>
