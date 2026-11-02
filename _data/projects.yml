@@ -2,16 +2,18 @@
 # `featured: true` puts the project in the home grid.
 # `group` controls which section it appears under on the Projects page.
 # `hero: true` makes it the scroll scene on the home page; `screens` are the phone shots.
+# `photos` fill the image carousel on its Projects card (falls back to `screens`).
+# A photo with `type: video` (plus an optional `poster`) becomes a video slide with play controls.
 
 - name: HF Scoring
-  group: Apps
+  group: Passion Projects
   status: Live
   year: 2025
   tagline: Stage scoring for USPSA matches, on your phone.
   summary: >-
-    A mobile-first scoring app for USPSA stages: configure paper and steel, tap in hits,
-    and get hit factor instantly. Stage library, results dashboard, analytics, and CSV
-    export — all local, no account needed.
+    A scoring app for USPSA stages. Configure your stage then tap in your hits
+    and get your hit factor instantly. Stage library, results dashboard, analytics, and CSV
+    export. All local, no account needed.
   stack: [JavaScript, GitHub Pages, localStorage]
   demo: https://eddiecwh.github.io/uspsa_scoring/
   repo: https://github.com/Eddiecwh/uspsa_scoring
@@ -27,6 +29,29 @@
     - src: /assets/img/hf-scoring/04-review.jpg
       alt: Score review table with hits, time, total points, and hit factor
 
+- name: Hunllef Helper
+  group: Passion Projects
+  status: Open source
+  year: 2025
+  tagline: Merged into Loze-Puts RuneLite plugin with 140k+ installs.
+  summary: >-
+    I added an ASMR voice option to Hunllef Helper, (original plugin made by Loze-Put). The plugin that calls out attack
+    styles in Old School RuneScape's Corrupted Gauntlet. My work features RuneLite
+    AudioPlayer integration, a new voice pack, and removing the old audio cache.
+  stack: [Java, RuneLite API, Open source]
+  photos:
+    - src: /assets/video/hunllef-helper-voice.mp4
+      type: video
+      poster: /assets/img/hunllef-helper/voice-poster.jpg
+      alt: Hunllef Helper counting down and calling out the switch from ranged to mage and back
+    - src: /assets/img/hunllef-helper/00-settings.webp
+      alt: Hunllef Helper settings in RuneLite with the Soft Asmr audio mode selected
+    - src: /assets/img/hunllef-helper/01-plugin-panel.jpg
+      alt: Hunllef Helper panel in RuneLite with the Start and Start mage buttons
+  repo: https://github.com/Loze-Put/hunllef-helper
+  pr: https://github.com/Loze-Put/hunllef-helper/pull/50
+  featured: true
+
 - name: DataFlow
   group: Backend Systems
   status: Shipped
@@ -34,9 +59,20 @@
   tagline: Uploads as a workflow, not a file input.
   summary: >-
     Multipart uploads go straight to S3 through presigned URLs, then a job pipeline
-    validates metadata, records every object, and hands off async processing — so
-    large files never touch the API server.
+    validates metadata, records every object, and hands off async processing.
+    Large files never touch the API server.
   stack: [Java 21, Spring Boot, PostgreSQL, AWS S3, MapStruct]
+  photos:
+    - src: /assets/img/figures/system-design/file-processor/diagram1.png
+      alt: DataFlow design diagram
+    - src: /assets/img/figures/system-design/file-processor/diagram2.png
+      alt: DataFlow upload flow diagram
+    - src: /assets/img/figures/system-design/file-processor/ui-upload.png
+      alt: Uploading a file from the UI
+    - src: /assets/img/figures/system-design/file-processor/multipart-uploaad.png
+      alt: Multipart upload in progress
+    - src: /assets/img/figures/system-design/file-processor/s3-upload.png
+      alt: Uploaded parts landing in S3
   repo: https://github.com/Eddiecwh/DataFlow
   featured: true
   posts:
@@ -53,12 +89,20 @@
   group: Backend Systems
   status: POC
   year: 2026
-  tagline: An internal chatbot that actually knows the docs.
+  tagline: Building and understanding a Retrieval-Augmented Generation system from scratch.
   summary: >-
-    A retrieval pipeline that ingests Confluence pages, Slack history, and code into
-    pgvector, then answers questions through a local model. Hybrid search, chunking, and
-    a Spring Boot API layer in front of it.
-  stack: [Python, sentence-transformers, PostgreSQL, pgvector, Ollama, Spring Boot]
+    Most legacy code base knowledge isn't officially documented. It lives in random slack messages with that one Senior developer who worked on the codebase and left 3 years ago. I built out this RAG project as an independent study to serve as an AI chatbot that ingests Confluence pages, Slack history, and code into pgvector, then answers questions through a local model using Ollama. I learned about Hybrid/Keyword search, chunking, and built a Spring Boot API layer in front of it.
+  stack:
+    [Python, sentence-transformers, PostgreSQL, pgvector, Ollama, Spring Boot]
+  photos:
+    - src: /assets/img/figures/sb-flask-flow.png
+      alt: Spring Boot to Python service request flow
+    - src: /assets/img/figures/sb-flow.png
+      alt: Spring Boot API layer flow
+    - src: /assets/img/figures/query-response-1.png
+      alt: A query and the chatbot response
+    - src: /assets/img/figures/sample-api-call.png
+      alt: Sample API call to the chatbot
   repo: https://github.com/Eddiecwh/RAG-POC
   featured: true
   posts:
@@ -79,6 +123,11 @@
     are persisted, scheduled, retried with exponential backoff, and tracked through a
     job lifecycle with a full audit trail.
   stack: [Java, Spring Boot, RabbitMQ, PostgreSQL, Spring Mail]
+  photos:
+    - src: /assets/img/figures/system-design/notification-system/design-plan.png
+      alt: NotifyFlow design plan
+    - src: /assets/img/figures/system-design/notification-system/notification-lifecycle.png
+      alt: Notification job lifecycle
   repo: https://github.com/Eddiecwh/NotifyFlow
   posts:
     - title: Notification system design
@@ -88,28 +137,17 @@
   group: Backend Systems
   status: Shipped
   year: 2026
-  tagline: A shortener that also tells you what's working.
+  tagline: A URL shortener built to learn about system design and caching
   summary: >-
     Auto-generated or custom short codes, activity-based TTL, Redis caching, and click
-    analytics — built to learn how a small system behaves under real read/write pressure.
+    analytics. Built to learn how a small system behaves under real read/write pressure.
   stack: [Java 21, Spring Boot, PostgreSQL, Redis, Docker]
+  photos:
+    - src: /assets/img/figures/first_dockerized_project.png
+      alt: The URL shortener running in Docker
   repo: https://github.com/Eddiecwh/url-shortner
   posts:
     - title: URL shortener design
       url: /posts/Url-shortner/
     - title: Learning Docker along the way
       url: /posts/learning-docker/
-
-- name: Hunllef Helper
-  group: Open Source
-  status: Open source
-  year: 2025
-  tagline: Merged into a RuneLite plugin with 140k+ installs.
-  summary: >-
-    I added an ASMR voice option to Hunllef Helper, the plugin that calls out attack
-    styles in Old School RuneScape's Gauntlet. The work landed upstream: RuneLite
-    AudioPlayer integration, a new voice pack, and removing the old audio cache.
-  stack: [Java, RuneLite API, Open source]
-  repo: https://github.com/Loze-Put/hunllef-helper
-  pr: https://github.com/Loze-Put/hunllef-helper/pull/50
-  featured: true

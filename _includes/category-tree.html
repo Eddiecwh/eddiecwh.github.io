@@ -35,7 +35,7 @@
           class="card-header d-flex justify-content-between hide-border-bottom"
         >
           <span class="ms-2">
-            <i class="far fa-folder{% if sub_categories_size > 0 %}-open{% endif %} fa-fw"></i>
+            <i class="far fa-folder-open fa-fw"></i>
 
             {% capture _category_url %}/categories/{{ category_name | slugify | url_encode }}/{% endcapture %}
             <a href="{{ _category_url | relative_url }}" class="mx-2">{{ category_name }}</a>
@@ -75,52 +75,87 @@
             </span>
           </span>
 
-          <!-- arrow -->
-          {% if sub_categories_size > 0 %}
-            <a
-              href="#{{ LIST_PREFIX }}{{ group_index }}"
-              data-bs-toggle="collapse"
-              aria-expanded="true"
-              aria-label="{{ HEAD_PREFIX }}{{ group_index }}-trigger"
-              class="category-trigger hide-border-bottom"
-            >
-              <i class="fas fa-fw fa-angle-down"></i>
-            </a>
-          {% else %}
-            <span data-bs-toggle="collapse" class="category-trigger hide-border-bottom disabled">
-              <i class="fas fa-fw fa-angle-right"></i>
-            </span>
-          {% endif %}
+          <!-- arrow: every category expands, to its sub-categories or else its posts -->
+          <a
+            href="#{{ LIST_PREFIX }}{{ group_index }}"
+            data-bs-toggle="collapse"
+            aria-expanded="true"
+            aria-label="{{ HEAD_PREFIX }}{{ group_index }}-trigger"
+            class="category-trigger hide-border-bottom"
+          >
+            <i class="fas fa-fw fa-angle-down"></i>
+          </a>
         </div>
         <!-- .card-header -->
+
+        {% if sub_categories_size == 0 %}
+          <!-- Posts, for a category with no sub-categories -->
+          <div id="{{ LIST_PREFIX }}{{ group_index }}" class="collapse show" aria-expanded="true">
+            <ul class="list-group">
+              {% for post in posts_of_category %}
+                <li class="list-group-item">
+                  <i class="far fa-file-lines fa-fw"></i>
+                  <a href="{{ post.url | relative_url }}" class="mx-2">{{ post.title }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
 
         <!-- Sub-categories -->
         {% if sub_categories_size > 0 %}
           <div id="{{ LIST_PREFIX }}{{ group_index }}" class="collapse show" aria-expanded="true">
             <ul class="list-group">
               {% for sub_category in sub_categories %}
-                <li class="list-group-item">
-                  <i class="far fa-folder fa-fw"></i>
+                {% capture _sub_list_id %}{{ LIST_PREFIX }}{{ group_index }}-{{ forloop.index }}{% endcapture %}
+                <li class="list-group-item sub-category">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <span>
+                      <i class="far fa-folder fa-fw"></i>
 
-                  {% capture _sub_ctg_url %}/categories/{{ sub_category | slugify | url_encode }}/{% endcapture %}
-                  <a href="{{ _sub_ctg_url | relative_url }}" class="mx-2">{{ sub_category }}</a>
+                      {% capture _sub_ctg_url %}/categories/{{ sub_category | slugify | url_encode }}/{% endcapture %}
+                      <a href="{{ _sub_ctg_url | relative_url }}" class="mx-2">{{ sub_category }}</a>
 
-                  {% assign posts_size = site.categories[sub_category] | size %}
-                  <span class="text-muted small font-weight-light">
-                    {{ posts_size }}
+                      {% assign posts_size = site.categories[sub_category] | size %}
+                      <span class="text-muted small font-weight-light">
+                        {{ posts_size }}
 
-                    {% if posts_size > 1 %}
-                      {{
-                        site.data.locales[lang].categories.post_measure.plural
-                        | default: site.data.locales[lang].categories.post_measure
-                      }}
-                    {% else %}
-                      {{
-                        site.data.locales[lang].categories.post_measure.singular
-                        | default: site.data.locales[lang].categories.post_measure
-                      }}
-                    {% endif %}
-                  </span>
+                        {% if posts_size > 1 %}
+                          {{
+                            site.data.locales[lang].categories.post_measure.plural
+                            | default: site.data.locales[lang].categories.post_measure
+                          }}
+                        {% else %}
+                          {{
+                            site.data.locales[lang].categories.post_measure.singular
+                            | default: site.data.locales[lang].categories.post_measure
+                          }}
+                        {% endif %}
+                      </span>
+                    </span>
+
+                    <!-- sub-category arrow: starts closed -->
+                    <a
+                      href="#{{ _sub_list_id }}"
+                      data-bs-toggle="collapse"
+                      aria-expanded="false"
+                      aria-label="{{ sub_category }} posts"
+                      class="category-trigger hide-border-bottom collapsed"
+                    >
+                      <i class="fas fa-fw fa-angle-down"></i>
+                    </a>
+                  </div>
+
+                  <div id="{{ _sub_list_id }}" class="collapse">
+                    <ul class="sub-category-posts">
+                      {% for post in site.categories[sub_category] %}
+                        <li>
+                          <i class="far fa-file-lines fa-fw"></i>
+                          <a href="{{ post.url | relative_url }}" class="mx-2">{{ post.title }}</a>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
                 </li>
               {% endfor %}
             </ul>

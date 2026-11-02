@@ -1,8 +1,51 @@
 {% assign p = include.project %}
+{% assign photos = p.photos | default: p.screens %}
 <article class="project-card">
+  {% if photos and photos.size > 0 %}
+    <div class="project-carousel" data-project-carousel>
+      <div class="project-carousel-track">
+        {% comment %}
+          Keep <a><img></a> on one line with no whitespace: Chirpy's refactor-content
+          only reuses an existing link when the <img> sits directly inside it.
+        {% endcomment %}
+        {% for photo in photos %}
+          {% if photo.type == 'video' %}
+            <div class="project-carousel-slide is-video">
+              <video
+                controls
+                playsinline
+                preload="none"
+                {% if photo.poster %}poster="{{ photo.poster | relative_url }}"{% endif %}
+                aria-label="{{ photo.alt }}"
+              >
+                <source src="{{ photo.src | relative_url }}" type="video/mp4">
+              </video>
+            </div>
+          {% else %}
+            <!-- prettier-ignore -->
+            <a href="{{ photo.src | relative_url }}" class="popup project-carousel-slide" data-gallery="{{ p.name | slugify }}"><img src="{{ photo.src | relative_url }}" alt="{{ photo.alt }}"></a>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% if photos.size > 1 %}
+        <button type="button" class="project-carousel-btn is-prev" aria-label="Previous photo">
+          <i class="fas fa-angle-left"></i>
+        </button>
+        <button type="button" class="project-carousel-btn is-next" aria-label="Next photo">
+          <i class="fas fa-angle-right"></i>
+        </button>
+        <div class="project-carousel-dots" aria-hidden="true">
+          {% for photo in photos %}
+            <span{% if forloop.first %} class="is-active"{% endif %}></span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
   <div class="project-card-top">
     <h3 class="project-name">{{ p.name }}</h3>
-    <span class="project-status is-{{ p.status | slugify }}">{{ p.status }}</span>
   </div>
 
   <p class="project-tagline">{{ p.tagline }}</p>

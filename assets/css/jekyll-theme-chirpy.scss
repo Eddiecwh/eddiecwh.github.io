@@ -54,6 +54,9 @@ kbd {
   --terminal-out: rgba(34, 49, 42, 0.7);
   --terminal-accent: rgba(0, 122, 61, 0.9);
   --terminal-shadow: 0 0 32px rgba(0, 122, 61, 0.06);
+
+  --group-passion: #007a3d;
+  --group-backend: #9a6200;
 }
 
 @mixin terminal-dark {
@@ -76,6 +79,9 @@ kbd {
   --terminal-out: rgba(214, 214, 214, 0.68);
   --terminal-accent: rgba(0, 204, 102, 0.85);
   --terminal-shadow: 0 0 32px rgba(0, 204, 102, 0.07);
+
+  --group-passion: #00cc66;
+  --group-backend: #ffbd2e;
 }
 
 @media (prefers-color-scheme: light) {
@@ -493,6 +499,105 @@ blockquote {
     transform 0.2s ease;
 }
 
+/* Photo carousel at the top of a project card */
+.project-carousel {
+  position: relative;
+  margin: -0.35rem -0.4rem 0.2rem;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--terminal-bg);
+  border: 1px solid var(--main-border-color);
+}
+
+.project-carousel-track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.project-carousel-slide {
+  flex: 0 0 100%;
+  height: 160px;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border-bottom: none !important;
+
+  img,
+  video {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  video {
+    background: #000;
+  }
+}
+
+.project-carousel-btn {
+  position: absolute;
+  top: 80px; /* middle of the 160px slide */
+  transform: translateY(-50%);
+  width: 1.7rem;
+  height: 1.7rem;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  &.is-prev {
+    left: 0.4rem;
+  }
+
+  &.is-next {
+    right: 0.4rem;
+  }
+}
+
+.project-carousel:hover .project-carousel-btn,
+.project-carousel-btn:focus-visible {
+  opacity: 1;
+}
+
+/* no hover on touch screens, so keep the arrows visible */
+@media (hover: none) {
+  .project-carousel-btn {
+    opacity: 0.85;
+  }
+}
+
+/* dots sit under the slides so they never cover a video's controls */
+.project-carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.3rem;
+  padding: 0.35rem 0 0.4rem;
+  pointer-events: none;
+
+  span {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: rgba(128, 128, 128, 0.5);
+    transition: background-color 0.2s ease;
+  }
+
+  span.is-active {
+    background: var(--link-color);
+  }
+}
+
 .project-card:hover {
   border-color: rgba(0, 204, 102, 0.45);
   transform: translateY(-2px);
@@ -509,35 +614,6 @@ blockquote {
   font-size: 1rem;
   margin: 0;
   color: var(--heading-color);
-}
-
-.project-status {
-  flex-shrink: 0;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.12rem 0.4rem;
-  border: 1px solid currentColor;
-  border-radius: 2px;
-}
-
-.is-shipped,
-.is-live {
-  color: #00cc66;
-}
-
-.is-open-source {
-  color: #4da3ff;
-}
-
-.is-in-progress {
-  color: #ffbd2e;
-}
-
-.is-poc,
-.is-personal {
-  color: var(--text-muted-color);
 }
 
 .project-tagline {
@@ -670,6 +746,14 @@ blockquote {
   text-transform: uppercase;
   color: var(--text-muted-color);
   margin: 0 0 0.9rem;
+
+  &.is-passion-projects {
+    color: var(--group-passion);
+  }
+
+  &.is-backend-systems {
+    color: var(--group-backend);
+  }
 }
 
 .experiment-list {
@@ -719,10 +803,36 @@ blockquote {
   margin-bottom: 0;
 }
 
+/* arrows point right while their list is closed */
+.category-tree .category-trigger[aria-expanded='false'] i {
+  transform: rotate(-90deg);
+}
+
+.category-tree .sub-category-posts {
+  list-style: none;
+  margin: 0.5rem 0 0.15rem;
+  padding-left: 1.6rem;
+
+  li {
+    display: flex;
+    align-items: baseline;
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+  }
+}
+
 
 /* ── Responsive ───────────────────────────────────────────── */
 
 @media (max-width: 991.98px) {
+  /* Opening the sidebar slides #main-wrapper 260px right; clip that so phones
+     don't see a wider page and zoom out. `clip`, unlike `hidden`, keeps the
+     sticky topbar working. */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
   .now-grid {
     grid-template-columns: 1fr;
     gap: 0.9rem;
