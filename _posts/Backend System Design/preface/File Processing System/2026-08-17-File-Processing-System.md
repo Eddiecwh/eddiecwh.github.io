@@ -163,3 +163,4 @@ Client -> s3: 5
 Multi part uploads should NOT be hard requirements for every single upload. I can't imagine a multi-part upload making sense for say a `4MB` picture. `AWS` recommends multipart uploads for files `> 100 MB`.
 
 I also don't think we should offer 2 different endpoints to let the Client make the decision on whether the file should be put through a simple upload or a multi-part upload. Although our API will not ever house the actual media being uploaded, it should be aware of the content size and make that decision internally to submit that process through the respective workflow.
+

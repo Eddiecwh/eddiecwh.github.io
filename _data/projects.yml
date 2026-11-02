@@ -1,0 +1,115 @@
+# Projects shown on the home page and /projects/.
+# `featured: true` puts the project in the home grid.
+# `group` controls which section it appears under on the Projects page.
+# `hero: true` makes it the scroll scene on the home page; `screens` are the phone shots.
+
+- name: HF Scoring
+  group: Apps
+  status: Live
+  year: 2025
+  tagline: Stage scoring for USPSA matches, on your phone.
+  summary: >-
+    A mobile-first scoring app for USPSA stages: configure paper and steel, tap in hits,
+    and get hit factor instantly. Stage library, results dashboard, analytics, and CSV
+    export — all local, no account needed.
+  stack: [JavaScript, GitHub Pages, localStorage]
+  demo: https://eddiecwh.github.io/uspsa_scoring/
+  repo: https://github.com/Eddiecwh/uspsa_scoring
+  featured: true
+  hero: true
+  screens:
+    - src: /assets/img/hf-scoring/01-dashboard.jpg
+      alt: HF Scoring dashboard with New Stage, Stage Library, and Quick Score
+    - src: /assets/img/hf-scoring/02-scoring.jpg
+      alt: Scoring screen with A, C, D, M, NS, and NPM buttons for each target
+    - src: /assets/img/hf-scoring/03-hit-factor.jpg
+      alt: Score preview showing a hit factor of 3.4200
+    - src: /assets/img/hf-scoring/04-review.jpg
+      alt: Score review table with hits, time, total points, and hit factor
+
+- name: DataFlow
+  group: Backend Systems
+  status: Shipped
+  year: 2026
+  tagline: Uploads as a workflow, not a file input.
+  summary: >-
+    Multipart uploads go straight to S3 through presigned URLs, then a job pipeline
+    validates metadata, records every object, and hands off async processing — so
+    large files never touch the API server.
+  stack: [Java 21, Spring Boot, PostgreSQL, AWS S3, MapStruct]
+  repo: https://github.com/Eddiecwh/DataFlow
+  featured: true
+  posts:
+    - title: Project talkthrough & goal setting
+      url: /posts/File-Processing-System/
+    - title: Design and planning
+      url: /posts/File-Processing-Design/
+    - title: Building the backend
+      url: /posts/Building-Our-Code/
+    - title: Multipart uploads and metadata
+      url: /posts/Enforcing-file-metadaata/
+
+- name: RAG-POC
+  group: Backend Systems
+  status: POC
+  year: 2026
+  tagline: An internal chatbot that actually knows the docs.
+  summary: >-
+    A retrieval pipeline that ingests Confluence pages, Slack history, and code into
+    pgvector, then answers questions through a local model. Hybrid search, chunking, and
+    a Spring Boot API layer in front of it.
+  stack: [Python, sentence-transformers, PostgreSQL, pgvector, Ollama, Spring Boot]
+  repo: https://github.com/Eddiecwh/RAG-POC
+  featured: true
+  posts:
+    - title: Building the RAG system from scratch
+      url: /posts/building-a-rag-system-from-scratch/
+    - title: Designing the hybrid search approach
+      url: /posts/Designing-the-hybrid-search-approach/
+    - title: Building the Spring Boot API layer
+      url: /posts/building-out-our-springboot-api-layer/
+
+- name: NotifyFlow
+  group: Backend Systems
+  status: Shipped
+  year: 2026
+  tagline: Notifications that survive a crash.
+  summary: >-
+    A Spring Boot service that decouples intake from delivery with RabbitMQ. Requests
+    are persisted, scheduled, retried with exponential backoff, and tracked through a
+    job lifecycle with a full audit trail.
+  stack: [Java, Spring Boot, RabbitMQ, PostgreSQL, Spring Mail]
+  repo: https://github.com/Eddiecwh/NotifyFlow
+  posts:
+    - title: Notification system design
+      url: /posts/Notification-System-part1/
+
+- name: URL Shortener
+  group: Backend Systems
+  status: Shipped
+  year: 2026
+  tagline: A shortener that also tells you what's working.
+  summary: >-
+    Auto-generated or custom short codes, activity-based TTL, Redis caching, and click
+    analytics — built to learn how a small system behaves under real read/write pressure.
+  stack: [Java 21, Spring Boot, PostgreSQL, Redis, Docker]
+  repo: https://github.com/Eddiecwh/url-shortner
+  posts:
+    - title: URL shortener design
+      url: /posts/Url-shortner/
+    - title: Learning Docker along the way
+      url: /posts/learning-docker/
+
+- name: Hunllef Helper
+  group: Open Source
+  status: Open source
+  year: 2025
+  tagline: Merged into a RuneLite plugin with 140k+ installs.
+  summary: >-
+    I added an ASMR voice option to Hunllef Helper, the plugin that calls out attack
+    styles in Old School RuneScape's Gauntlet. The work landed upstream: RuneLite
+    AudioPlayer integration, a new voice pack, and removing the old audio cache.
+  stack: [Java, RuneLite API, Open source]
+  repo: https://github.com/Loze-Put/hunllef-helper
+  pr: https://github.com/Loze-Put/hunllef-helper/pull/50
+  featured: true

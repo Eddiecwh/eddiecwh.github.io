@@ -5,7 +5,7 @@ categories: [Projects, AI Assisted Scheduler]
 tags: [Projects, AI, Backend]
 ---
 
-## Project Discussion and Inspiration ##
+# Project Discussion and Inspiration #
 
 I've been looking for some ideas to built out, not just to learn new things but also something practical that I think that'd I'd be able to realistically use on a day-to-day basis. My million dollar idea, is an AI assisted scheduler.
 
@@ -425,9 +425,135 @@ I hope I was able to illustrate this clearly in the diagram, still getting the h
 
 ### Deep-dives ###
 
-```
-The AI Agent implementation — specifically how you define tools in Spring AI, how the agentic loop actually works in code, and how you wire SSE streaming to it
+#### The AI Agent implementation ####
 
-Google OAuth flow — the actual token exchange, how you store and decrypt the refresh token, and how you attach the access token to outbound Google API calls
+We've discussed the overall workflow of the agentic loop, so let's dive a little deeper into how we're going to implement the specific parts like tools in Spring AI, how the agentic loop actually works in code, and how we wire SSE streaming into it
+
+<br>
+
+##### The Agent Setup
+
+So with Spring AI, we have a layer of abstraction with `ChatClient` that sits as an intermediary layer between our `SpringBoot application` and the actual `LLM` we choose to use
+
+Following our SpringBoot application we have a `AgentController` to expose our endpoint and a `AgentService` with `ChatClient` and our tools injected into it's constructor
+
+```
+- AgentController
+- AgentService
+- Tools/
+    - CalendarTool
+    - TaskTool
+```
+
+<br>
+
+__Defining Tools__
+
+For our tools, we need to do a couple of things
+- Define the tools ass a class with the `@Component` annotation to register it as a `Spring bean` so Spring can mange it's lifecycle and inject it where we need it
+- Annotate the individual methods that the tool has access to with the `@Tool` annotation
+
+Example:
+```
+@Component
+public class DateTimeTool {
+
+    @Tool(description = "Get the current date and time")
+    public String getCurrentDateTime() {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+    }
+}
+```
+
+<br>
+
+__Using Our Tools__
+
+So Spring knows our tools exist, but our ChatClient doesn't yet. We achieve this by injecting our tools into our AgentService constructor (where we build our ChatClient w/ the tools it needs to answer the request)
+
+```
+@Service
+public class AgentService {
+
+    private final ChatClient chatClient;
+
+    public AgentService(ChatClient.Builder builder, DateTimeTool dateTimeTool) {
+        this.chatClient = builder
+                .defaultTools(dateTimeTool)
+                .build();
+    }
+
+    public String chat(String message) {
+        return chatClient.prompt()
+                .user(message)
+                .call()
+                .content()
+    }
+}
+```
+
+<br>
+
+__Simultaneous requests and Memory Handling__
+
+The example I posted above is from a simple request/response Agent I built out to use a `DateTime` tool to tell the user what the date and time is currently. 
+
+The difference between this and what we're trying to achieve is that this is a single turn interaction. It's not really conversational, you ask a question you get a response. We want our Agent to be able to ask intelligent followups or handle memory recollection like in this situation:
+
+_user: Schedule a meeting for Thursday_
+_user: Wait actually, make it Friday instead_
+
+So a few things to tackle here:
+
+1. With how we defined our DateTime example, the agent wouldn't know what we mean by _"it"_. We know _"it"_ means the event at hand, but our agent doesn't have memory of that
+- So how do we get Spring AI to handle conversation memory?
+
+2. Our agent returns a plain string, not an SSE stream.
+- What do we need to change to have the return type stream intermediate updates back to the client?
+
+It's my first time working with Spring AI, so we're gonna do some research together today!
+
+Shoutout to Spring Documentation because it is really good. Here's the documentation of [ChatMemory](https://docs.spring.io/spring-ai/reference/api/chat-memory.html) that I am digging into
+
+So LLMs are inherently `stateless`, they do not retain information about past interactions
+- Spring AI offers us the `ChatMemory` abstraction to retrieve info across our interactions
+- It works by handling storage via `ChatMemoryRepository`, then it's up to `ChatMemory` to decide which messages to keep and when to remove them
+
+There are two types of memory:
+- __Chat Memory__
+    - information that the LLM retains and uses to main contextual awareness during a conversation
+- __Chat History__
+    - The entire convo history, inbcluding all messages exchanged between the user/model
+
+So the summary in my own words is:
+- Memory 
+    - Selective memory that the LLM decides is neccessary
+- History
+    - Everything
+
+Also should point out that this is in the context of the current conversation. So for storing ALL message history across the boaard, we'd have to look into something else like Spring Data JPA for retrieval/storage of the complete chat history.
+
+__Defining a Conversation Window__
+
+When does a new conversation start and when does an existing one continue?
+
+For our application, it would make sense for a conversation to follow the user session. When the user closes the app, or their session expires the conversation is over.
+
+So whenever a user starts a session, we generate a `conversationId` and pass it with every message to `ChatMemory` so `SpringAI` can use it to maintain context for that session.
+
+So a few things have to change here
+
+1. Our `chat` method needs to accept a `conversationId` as a parameter
+2. Our client needs to generate a `conversationId` and pass it in the requestBody when it makes a call to `/agent/message` so our REST endpoint needs to be modified slightly
+
+```
+POST /agent/message
+requestBody {
+    "message" : "Schedule a coffee chat with John at 2:30 PM on Thursday",
+    conversationId: "123"
+}
+```
+
+##### Google OAuth flow #### — the actual token exchange, how you store and decrypt the refresh token, and how you attach the access token to outbound Google API calls
 ```
 
